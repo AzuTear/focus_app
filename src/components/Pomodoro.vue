@@ -65,7 +65,9 @@ function reset() {
 }
 </script>
 <template>
-  <div class="grid justify-items-center p-10 w-full max-w-md mx-auto">
+  <div
+    class="grid justify-items-center p-10 w-full max-w-md mx-auto bg-[#fff7ed] text-[#78350f] rounded-lg shadow"
+  >
     <div class="text-center mb-6 w-full">
       <p class="mb-2 text-lg font-semibold">Timer (in Minutes):</p>
       <div class="flex items-center justify-center space-x-2">
@@ -106,3 +108,4 @@ function reset() {
     </div>
   </div>
 </template>
+
