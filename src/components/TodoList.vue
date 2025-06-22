@@ -1,70 +1,92 @@
 <script setup lang="ts">
-import { ref } from "vue";
-import Button from "primevue/button";
-import type { Task } from "./models/task.ts";
-import { computed } from "vue";
+import { ref } from 'vue'
+import Button from 'primevue/button'
+import type { TodoList, Task } from '../models/task'
 
-const tasks = ref("");
-const taskList = ref<Task[]>([]);
-let index = 1;
+const newListName = ref('')
+const lists = ref<TodoList[]>([])
+let listId = 1
+let taskId = 1
 
-function addTask() {
-  if (tasks.value.trim() !== "") {
-    taskList.value.push({
-      id: index++,
-      description: tasks.value,
-      completed: false,
-    });
-    tasks.value = "";
+function addList() {
+  if (newListName.value.trim() !== '') {
+    lists.value.push({ id: listId++, name: newListName.value, tasks: [], newTask: '' })
+    newListName.value = ''
   }
 }
 
-function deleteTask(id: number) {
-  const index = taskList.value.findIndex((task) => task.id === id);
-  if (index != -1) {
-    taskList.value.splice(index, 1);
-  }
+function deleteList(id: number) {
+  const idx = lists.value.findIndex(l => l.id === id)
+  if (idx !== -1) lists.value.splice(idx, 1)
 }
 
-const isCompleted = computed(() => {
-  return taskList.value.filter((task) => task.completed);
-});
+function addTask(list: TodoList) {
+  if (!list.newTask) return
+  list.tasks.push({ id: taskId++, description: list.newTask, completed: false })
+  list.newTask = ''
+}
+
+function deleteTask(list: TodoList, id: number) {
+  const idx = list.tasks.findIndex(t => t.id === id)
+  if (idx !== -1) list.tasks.splice(idx, 1)
+}
+
+function startEdit(task: Task) {
+  task.editing = true
+}
+
+function finishEdit(task: Task) {
+  if (task.description.trim() === '') return
+  task.editing = false
+}
 </script>
 
 <template>
-  <div class="justify-items-center p-10 w-1/2 mx-auto">
-    <div class="justify-start pb-5">
-      <label>New Task</label>
+  <div class="p-6 max-w-3xl mx-auto bg-[#e0f2fe] text-[#334155] rounded-lg space-y-6">
+    <h1 class="text-2xl font-semibold text-center">Todo Lists</h1>
+    <div class="flex gap-2">
+      <input
+        v-model="newListName"
+        type="text"
+        placeholder="List name"
+        class="border rounded px-2 py-1 flex-1"
+      />
+      <Button label="Add List" @click="addList" />
     </div>
-    <form @submit.prevent>
-      <div class="border-4 border-sky-500 flex p-5 rounded-lg">
+
+    <div v-for="list in lists" :key="list.id" class="bg-[#f0f9ff] p-4 rounded shadow">
+      <div class="flex justify-between items-center mb-2">
+        <h2 class="text-xl font-medium">{{ list.name }}</h2>
+        <Button icon="pi pi-trash" text @click="deleteList(list.id)" />
+      </div>
+
+      <div class="flex gap-2 mb-4">
         <input
-          v-model="tasks"
+          v-model="list.newTask"
           type="text"
-          placeholder="Enter task name"
-          class="w-full"
+          placeholder="New task"
+          class="border rounded px-2 py-1 flex-1"
         />
+        <Button label="Add" @click="addTask(list)" />
       </div>
-      <div class="flex justify-end pt-2">
-        <Button label="Add item" @click="addTask" />
-      </div>
-    </form>
-    <div class="justify-start">
-      <h1>Done {{ isCompleted.length }} / {{ taskList.length }}</h1>
-    </div>
-    <div>
-      <li v-for="task in taskList" :key="task.id">
-        <div>
+
+      <ul class="space-y-2">
+        <li v-for="task in list.tasks" :key="task.id" class="flex items-center gap-2">
           <input type="checkbox" v-model="task.completed" />
-          ID: {{ task.id }} Beschreibung: {{ task.description }} Done:
-          {{ task.completed }}
-          <Button
-            v-show="task.completed == true"
-            icon="pi pi-trash"
-            @click="deleteTask(task.id)"
-          ></Button>
-        </div>
-      </li>
+          <input
+            v-if="task.editing"
+            v-model="task.description"
+            @blur="finishEdit(task)"
+            class="border rounded px-1 flex-1"
+          />
+          <span v-else :class="{ 'line-through text-gray-500': task.completed }" class="flex-1">
+            {{ task.description }}
+          </span>
+          <Button icon="pi pi-pencil" text @click="startEdit(task)" />
+          <Button icon="pi pi-trash" text @click="deleteTask(list, task.id)" />
+        </li>
+      </ul>
     </div>
   </div>
 </template>
+

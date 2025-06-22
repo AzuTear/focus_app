@@ -1,36 +1,54 @@
 <script setup lang="ts">
 import DatePicker from "primevue/datepicker";
+import Button from "primevue/button";
 import { ref } from "vue";
 
-const date = ref();
+const claimedDates = ref<Date[]>([]);
+
+function claimToday() {
+  const today = new Date();
+  const exists = claimedDates.value.some(
+    (d) => d.toDateString() === today.toDateString(),
+  );
+  if (!exists) {
+    claimedDates.value.push(today);
+  }
+}
 </script>
 <template>
-  <div class="activity-calendar">
-    <h1 class="flex justify-center p-5 text-3xl">Activity Calendar</h1>
-    <div class="card flex justify-center">
-      <DatePicker v-model="date" inline showWeek class="w-full sm:w-[30rem]" />
+  <div
+    class="activity-calendar bg-[#f3e8ff] text-[#4a437e] p-6 rounded-lg shadow w-fit mx-auto"
+  >
+    <h1 class="text-center text-3xl font-semibold mb-4">Activity Calendar</h1>
+    <div class="flex justify-center mb-4">
+      <DatePicker
+        v-model="claimedDates"
+        inline
+        showWeek
+        selectionMode="multiple"
+        class="w-full sm:w-[30rem]"
+      />
+    </div>
+    <div class="text-center">
+      <Button label="Daily Claim" @click="claimToday" />
     </div>
   </div>
-  <p>{{ date }}</p>
 </template>
 
 <style scoped>
 .activity-calendar :deep(.p-datepicker) {
-  /* Dunkler, gesättigter Lilac als Hintergrund */
-  --p-datepicker-panel-background: #4a437e; /* Hauptfläche */
-  --p-datepicker-panel-color: #f5f5fa; /* Heller Text */
+  /* Pastel styled calendar */
+  --p-datepicker-panel-background: #e9d5ff;
+  --p-datepicker-panel-color: #4a437e;
 
-  /* Header kontrastreich, leicht heller */
-  --p-datepicker-header-background: #5c569b;
-  --p-datepicker-header-color: #ffffff;
+  --p-datepicker-header-background: #d8b4fe;
+  --p-datepicker-header-color: #4a437e;
 
-  /* Kalenderzellen */
-  --p-datepicker-calendar-background: #4a437e;
-  --p-datepicker-calendar-color: #f0f0f8;
+  --p-datepicker-calendar-background: #f3e8ff;
+  --p-datepicker-calendar-color: #4a437e;
 
-  /* Hover / aktiv */
-  --p-datepicker-day-hover-background: #6e66b5;
-  --p-datepicker-day-active-background: #867fd3;
-  --p-datepicker-day-active-color: #ffffff;
+  --p-datepicker-day-hover-background: #ddd6fe;
+  --p-datepicker-day-active-background: #c4b5fd;
+  --p-datepicker-day-active-color: #4a437e;
 }
 </style>
